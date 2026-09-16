@@ -5,10 +5,10 @@
 
 // Initialize tension sensors with corresponding CS and DRDY pins
 // Calibration factors: (Vref / gain) / (2^23) — tune to your load cell
-TensionSensor ts1(30, 31, 1.0f);
-TensionSensor ts2(32, 33, 1.0f);
-TensionSensor ts3(34, 35, 1.0f);
-TensionSensor ts4(36, 37, 1.0f);
+TensionSensor ts1(1, 33, 34, (1.0/(1<<23)));
+TensionSensor ts2(2, 35, 36, (1.0/(1<<23)));
+TensionSensor ts3(3, 39, 40, (1.0/(1<<23)));
+TensionSensor ts4(4, 22, 23, (1.0/(1<<23)));
 void sensor1_read() {ts1.update_force();}
 void sensor2_read() {ts2.update_force();}
 void sensor3_read() {ts3.update_force();}
@@ -19,13 +19,13 @@ void setup() {
     while (!Serial) {}
     Serial.println("Teensy booted");
 
+    SPI.begin();
+    SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE1));
+
     ts1.start_sensor();
     ts2.start_sensor();
     ts3.start_sensor();
     ts4.start_sensor();
-
-    SPI.begin();
-    SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE1));
 
     attachInterrupt(ts1.getdrdypin(), sensor1_read, FALLING); 
     attachInterrupt(ts2.getdrdypin(), sensor2_read, FALLING); 
@@ -38,19 +38,13 @@ void setup() {
 void loop() {
     // Read out the load cell measurements @ 10 Hz
     noInterrupts();
-    float force_1 = ts1.reading();
-    float force_2 = ts2.reading();
-    float force_3 = ts3.reading();
-    float force_4 = ts4.reading();
+    float force_1 = abs(ts1.reading());
+    float force_2 = abs(ts2.reading());
+    float force_3 = abs(ts3.reading());
+    float force_4 = abs(ts4.reading());
     interrupts();
 
-    Serial.print(force_1);
-    Serial.print(",");
-    Serial.print(force_2);
-    Serial.print(",");
-    Serial.print(force_3);
-    Serial.print(",");
-    Serial.println(force_4);
+    Serial.println(String(force_1) + "," + String(force_2) + "," + String(force_3) + "," + String(force_4));
 
     delay(100);
 }

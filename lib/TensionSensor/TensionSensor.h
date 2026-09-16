@@ -4,7 +4,7 @@
 
 class TensionSensor {
     public:
-        TensionSensor(int cspin, int drdypin, float lccal);
+        TensionSensor(int index,int cspin, int drdypin, float lccal);
         void start_sensor();
         void update_force();
         float reading();

@@ -65,22 +65,24 @@ void ADS1220::powerDown() {
 }
 
 void ADS1220::findADCOffset(int32_t num_samples) {
-
+  Serial.print("Calibrating ADC Offset [");
   long cal_sum = 0;
 
-  delay(300);
+  delay(1000);
 
   for (int i = 0; i < num_samples; i++) {
     while (digitalRead(_drdy_pin)) {
       delayMicroseconds(1);
     }
     cal_sum += readData();
-  }
+    delay(100);
+    Serial.print("=");
+  };
+  Serial.print("]\n");
   _lc_offset = (int32_t) (1.0f * cal_sum / num_samples);
 
-  Serial.println("Finished Find ADCOFFSET ");
+  Serial.println("Finished Find ADCOFFSET " + String(_lc_offset));
 }
-
 
 void ADS1220::spi_command(uint8_t command) {
     digitalWrite(_cs_pin, LOW);
